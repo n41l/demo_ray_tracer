@@ -10,7 +10,8 @@
 
 class Sphere : public Primitive {
 public:
-    Sphere(const Vec3 &center, float radius, const Color &color): m_center(center), m_radius(radius), m_color(color) {};
+    Sphere(const Vec3 &center, float radius, Material *material)
+            : Primitive(material), m_center(center), m_radius(radius) {};
 
     virtual RayHitResult intersection(const Ray &r, float t0, float t1) override {
         float A = r.direction().dot(r.direction());
@@ -43,25 +44,19 @@ public:
             }
         }
 
-        return RayHitResult::NotHit((Primitive *) this, r);
-    }
-
-    virtual Color color() const override {
-        return m_color;
+        return RayHitResult::NotHit((Primitive *) this);
     }
 
 private:
     RayHitResult calculate(const Ray &r, float t) const {
         Vec3 p = r.evaluate(t);
         Vec3 n = p.minus(m_center).scale(1/m_radius);
-        return RayHitResult((Primitive *) this, r, t, n);
+        return RayHitResult((Primitive *) this, t, n);
     }
 
 private:
     Vec3 m_center;
     float m_radius;
-
-    Vec3 m_color;
 };
 
 #endif //DEMO_RAY_TRACER_SPHERE_H

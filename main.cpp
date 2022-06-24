@@ -1,9 +1,10 @@
 #include <iostream>
-#include "math.h"
-#include "color.h"
-#include "ray.h"
-#include "sphere.h"
-#include "scene.h"
+#include "core/math.h"
+#include "core/color.h"
+#include "render/ray.h"
+#include "render/sphere.h"
+#include "render/scene.h"
+#include "render/light.h"
 
 
 Color ray_color(const Ray& r) {
@@ -24,12 +25,26 @@ int main() {
     Vec3 horizontal = Vec3(1.0f, 0.0f, 0.0f);
     Vec3 vertical = Vec3(0.0f, 1.0f, 0.0f);
 
-    Sphere *s1 = new Sphere(Vec3(0.0f, 0.0f, -15.0f), 5, Vec3(1, 0, 0));
-    Sphere *s2 = new Sphere(Vec3(5.0f, 3.0f, -20.0f), 8, Vec3(0, 1, 0));
+    BlinnPhongMaterial *mat1 = new BlinnPhongMaterial(
+            Color(0.5, 0.5, 0.5),
+            Color(1.0, 1.0, 1.0),
+            10
+            );
+    BlinnPhongMaterial *mat2 = new BlinnPhongMaterial(
+            Color(1.0, 0.5, 0.5),
+            Color(0.5, 0.3, 0.8),
+            50
+            );
+    Sphere *s1 = new Sphere(Vec3(0.0f, 0.0f, -15.0f), 5, mat1);
+    Sphere *s2 = new Sphere(Vec3(5.0f, 3.0f, -20.0f), 8, mat2);
 
     Scene scene = Scene();
     scene.addPrimitive(s1);
     scene.addPrimitive(s2);
+
+    std::vector<Light*> lights;
+    lights.push_back(new PointLight(Vec3(5.0f, 10.0f, -5.0f), Color(1.0f, 1.0f, 1.0f)));
+    lights.push_back(new DirectionLight(Vec3(1.0f, -1.0f, -1.0f).normalize(), Color(1.0f, 1.0f, 1.0f)));
 
     std::cout << "P3\n" << imageWidth << ' ' << imageHeight << "\n255\n";
 
@@ -43,7 +58,9 @@ int main() {
             RayHitResult rHit = scene.intersection(r, 0.0f, 100.0f);
 
             if (rHit.t() != std::numeric_limits<float>::max()) {
-                pixelColor = rHit.primitive()->color();
+                for(auto light : lights) {
+                    pixelColor = light->illuminate(r, rHit);
+                }
             }
 
             write_color(std::cout, pixelColor);

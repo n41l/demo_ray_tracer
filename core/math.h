@@ -36,6 +36,10 @@ public:
         return Vec3(m_x / length, m_y / length, m_z / length);
     }
 
+    inline Vec3 inverse() const {
+        return Vec3(-m_x, -m_y, -m_z);
+    }
+
     float x() const { return m_x; }
     float y() const { return m_y; }
     float z() const { return m_z; }

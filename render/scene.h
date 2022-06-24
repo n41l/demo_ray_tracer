@@ -10,13 +10,13 @@
 
 class Scene: public Primitive {
 public:
-    Scene() {};
+    Scene() : Primitive(nullptr) {};
     void addPrimitive(Primitive *p) {
         m_ps.push_back(p);
     }
 
     virtual RayHitResult intersection(const Ray &r, float t0, float t1) override {
-        RayHitResult res = RayHitResult::NotHit((Primitive *)this, r);
+        RayHitResult res = RayHitResult::NotHit((Primitive *)this);
         for (auto p : m_ps) {
             RayHitResult rHit = p->intersection(r, t0, t1);
             if (rHit.t() < res.t()) {
@@ -26,10 +26,6 @@ public:
 
         return res;
     }
-
-    virtual Color color() const override {
-        return Vec3(0.0f, 0.0f, 0.0f);
-    };
 
 private:
     std::vector<Primitive *> m_ps = std::vector<Primitive *>();

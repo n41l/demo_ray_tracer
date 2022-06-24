@@ -5,7 +5,7 @@
 #ifndef DEMO_RAY_TRACER_RAY_H
 #define DEMO_RAY_TRACER_RAY_H
 
-#include "math.h"
+#include "../core/math.h"
 class Ray {
 public:
     Ray(const Vec3& o, const Vec3& d): m_origin(o), m_direction(d) {};
