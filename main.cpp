@@ -5,6 +5,7 @@
 #include "render/sphere.h"
 #include "render/scene.h"
 #include "render/light.h"
+#include "render/plane.h"
 
 
 Color ray_color(const Ray& r) {
@@ -35,12 +36,20 @@ int main() {
             Color(1.0, 1.0, 1.0),
             50
             );
+    BlinnPhongMaterial *mat3 = new BlinnPhongMaterial(
+            Color(1.0, 1.0, 1.0),
+            Color(0.5, 0.5, 0.5),
+            1
+    );
+
     Sphere *s1 = new Sphere(Vec3(0.0f, 0.0f, -15.0f), 5, mat1);
     Sphere *s2 = new Sphere(Vec3(5.0f, 3.0f, -20.0f), 8, mat2);
+    Plane * plane = new Plane(Vec3(0.0f,-5.0f, 0.0f), Vec3(0.0f, 1.0f, 0.0f), mat3);
 
     Scene scene = Scene();
     scene.addPrimitive(s1);
     scene.addPrimitive(s2);
+    scene.addPrimitive(plane);
 
     std::vector<Light*> lights;
     lights.push_back(new PointLight(Vec3(5.0f, 10.0f, -5.0f), Color(10.0f, 10.0f, 10.0f)));
@@ -55,7 +64,7 @@ int main() {
             Ray r(eyePosition, horizontal.scale(u).add(vertical.scale(v)).add(Vec3(0.0, 0.0, -focalLength)));
             Color pixelColor = ray_color(r);
 
-            RayHitResult rHit = scene.intersection(r, 0.0f, 100.0f);
+            RayHitResult rHit = scene.intersection(r, 0.0f, 100000.0f);
 
             if (rHit.t() != std::numeric_limits<float>::max()) {
                 pixelColor = Vec3(0.0f, 0.0f, 0.0f);
