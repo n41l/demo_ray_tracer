@@ -4,3 +4,7 @@
 
 **.ppm
 
+.idea/**
+
+.DS_Store
+
