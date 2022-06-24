@@ -6,6 +6,14 @@
 
 #include <math.h>
 
+namespace math {
+    template <typename T>
+    T clamp(const T& n, const T& lower, const T& upper) {
+        return std::max(lower, std::min(n, upper));
+    }
+}
+
+
 class Vec3 {
 public:
     Vec3(float x, float y, float z): m_x(x), m_y(y), m_z(z) {};
@@ -38,6 +46,10 @@ public:
 
     inline Vec3 inverse() const {
         return Vec3(-m_x, -m_y, -m_z);
+    }
+
+    inline Vec3 clamp(float lower, float upper) const {
+        return Vec3(math::clamp(m_x, lower, upper), math::clamp(m_y, lower, upper), math::clamp(m_z, lower, upper));
     }
 
     float x() const { return m_x; }

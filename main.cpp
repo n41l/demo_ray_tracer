@@ -26,13 +26,13 @@ int main() {
     Vec3 vertical = Vec3(0.0f, 1.0f, 0.0f);
 
     BlinnPhongMaterial *mat1 = new BlinnPhongMaterial(
-            Color(0.5, 0.5, 0.5),
+            Color(0.1, 1.0, 1.0),
             Color(1.0, 1.0, 1.0),
-            10
+            1
             );
     BlinnPhongMaterial *mat2 = new BlinnPhongMaterial(
-            Color(1.0, 0.5, 0.5),
-            Color(0.5, 0.3, 0.8),
+            Color(1.0, 1.0, 1.0),
+            Color(1.0, 1.0, 1.0),
             50
             );
     Sphere *s1 = new Sphere(Vec3(0.0f, 0.0f, -15.0f), 5, mat1);
@@ -43,7 +43,7 @@ int main() {
     scene.addPrimitive(s2);
 
     std::vector<Light*> lights;
-    lights.push_back(new PointLight(Vec3(5.0f, 10.0f, -5.0f), Color(1.0f, 1.0f, 1.0f)));
+    lights.push_back(new PointLight(Vec3(5.0f, 10.0f, -5.0f), Color(10.0f, 10.0f, 10.0f)));
     lights.push_back(new DirectionLight(Vec3(1.0f, -1.0f, -1.0f).normalize(), Color(1.0f, 1.0f, 1.0f)));
 
     std::cout << "P3\n" << imageWidth << ' ' << imageHeight << "\n255\n";
@@ -58,9 +58,12 @@ int main() {
             RayHitResult rHit = scene.intersection(r, 0.0f, 100.0f);
 
             if (rHit.t() != std::numeric_limits<float>::max()) {
+                pixelColor = Vec3(0.0f, 0.0f, 0.0f);
                 for(auto light : lights) {
-                    pixelColor = light->illuminate(r, rHit);
+                    pixelColor = pixelColor.add(light->illuminate(r, rHit));
                 }
+
+                pixelColor = pixelColor.clamp(0.0f, 1.0f);
             }
 
             write_color(std::cout, pixelColor);

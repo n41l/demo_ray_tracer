@@ -5,7 +5,6 @@
 #ifndef DEMO_RAY_TRACER_COLOR_H
 #define DEMO_RAY_TRACER_COLOR_H
 
-#include "math.h"
 #include <iostream>
 
 void write_color(std::ostream &out, Color pixel_color) {

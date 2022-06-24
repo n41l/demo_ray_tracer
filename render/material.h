@@ -26,8 +26,7 @@ public:
     Color evaluate(const Vec3 &lightDir, const Vec3 &viewerDir, const Vec3 &normal) override {
         Color L = m_reflectance.scale(1 / M_PI);
         Vec3 halfVector = lightDir.add(viewerDir).normalize();
-
-        return L.add(m_specularCoefficient.scale(std::max(0.0f, powf(normal.dot(halfVector), m_phongExponent))));
+        return L.add(m_specularCoefficient.scale(std::max(0.0f, pow(normal.dot(halfVector), m_phongExponent))));
     }
 
 
