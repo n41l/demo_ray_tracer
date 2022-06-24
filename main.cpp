@@ -52,7 +52,7 @@ int main() {
     scene.addPrimitive(plane);
 
     std::vector<Light*> lights;
-    lights.push_back(new PointLight(Vec3(5.0f, 10.0f, -5.0f), Color(10.0f, 10.0f, 10.0f)));
+    lights.push_back(new PointLight(Vec3(5.0f, 10.0f, -5.0f), Color(20.0f, 20.0f, 20.0f)));
     lights.push_back(new DirectionLight(Vec3(1.0f, -1.0f, -1.0f).normalize(), Color(1.0f, 1.0f, 1.0f)));
 
     std::cout << "P3\n" << imageWidth << ' ' << imageHeight << "\n255\n";
@@ -64,12 +64,12 @@ int main() {
             Ray r(eyePosition, horizontal.scale(u).add(vertical.scale(v)).add(Vec3(0.0, 0.0, -focalLength)));
             Color pixelColor = ray_color(r);
 
-            RayHitResult rHit = scene.intersection(r, 0.0f, 100000.0f);
+            RayHitResult rHit = scene.intersection(r, 0.0f, 1000.0f);
 
             if (rHit.t() != std::numeric_limits<float>::max()) {
                 pixelColor = Vec3(0.0f, 0.0f, 0.0f);
                 for(auto light : lights) {
-                    pixelColor = pixelColor.add(light->illuminate(r, rHit));
+                    pixelColor = pixelColor.add(light->illuminate(r, rHit, scene));
                 }
 
                 pixelColor = pixelColor.clamp(0.0f, 1.0f);

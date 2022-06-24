@@ -15,6 +15,10 @@ public:
         m_ps.push_back(p);
     }
 
+    std::vector<Primitive *> primitives() {
+        return m_ps;
+    }
+
     virtual RayHitResult intersection(const Ray &r, float t0, float t1) override {
         RayHitResult res = RayHitResult::NotHit((Primitive *)this);
         for (auto p : m_ps) {
