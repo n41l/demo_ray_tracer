@@ -1,20 +1,10 @@
 #include <iostream>
 #include "math.h"
 #include "color.h"
+#include "ray.h"
+#include "sphere.h"
+#include "scene.h"
 
-class Ray {
-public:
-    Ray(const Vec3& o, const Vec3& d): m_origin(o), m_direction(d) {};
-    Vec3 origin() const { return m_origin; }
-    Vec3 direction() const { return m_direction; }
-
-    Vec3 evaluate(float t) {
-        return m_origin.add(m_direction.scale(t));
-    }
-
-private:
-    Vec3 m_origin, m_direction;
-};
 
 Color ray_color(const Ray& r) {
     Vec3 unit_direction = r.direction().normalize();
@@ -34,6 +24,13 @@ int main() {
     Vec3 horizontal = Vec3(1.0f, 0.0f, 0.0f);
     Vec3 vertical = Vec3(0.0f, 1.0f, 0.0f);
 
+    Sphere *s1 = new Sphere(Vec3(0.0f, 0.0f, -15.0f), 5, Vec3(1, 0, 0));
+    Sphere *s2 = new Sphere(Vec3(5.0f, 3.0f, -20.0f), 8, Vec3(0, 1, 0));
+
+    Scene scene = Scene();
+    scene.addPrimitive(s1);
+    scene.addPrimitive(s2);
+
     std::cout << "P3\n" << imageWidth << ' ' << imageHeight << "\n255\n";
 
     for (int j = imageHeight - 1; j >= 0; --j) {
@@ -42,6 +39,13 @@ int main() {
             float v = viewportHeight * (j + 0.5) / imageHeight - halfVpHeight;
             Ray r(eyePosition, horizontal.scale(u).add(vertical.scale(v)).add(Vec3(0.0, 0.0, -focalLength)));
             Color pixelColor = ray_color(r);
+
+            RayHitResult rHit = scene.intersection(r, 0.0f, 100.0f);
+
+            if (rHit.t() != std::numeric_limits<float>::max()) {
+                pixelColor = rHit.primitive()->color();
+            }
+
             write_color(std::cout, pixelColor);
         }
     }
