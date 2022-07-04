@@ -5,12 +5,23 @@
 #ifndef DEMO_RAY_TRACER_COLOR_H
 #define DEMO_RAY_TRACER_COLOR_H
 
+#include "math.h"
+#include "utilities.h"
 #include <iostream>
 
-void write_color(std::ostream &out, Color pixel_color) {
-    out << static_cast<int>(255.999 * pixel_color.x()) << ' '
-        << static_cast<int>(255.999 * pixel_color.y()) << ' '
-        << static_cast<int>(255.999 * pixel_color.z()) << '\n';
+void write_color(std::ostream &out, Color pixel_color, int samplesPerPixel) {
+    auto r = pixel_color.x();
+    auto g = pixel_color.y();
+    auto b = pixel_color.z();
+
+    auto scale = 1.0 / samplesPerPixel;
+    r = sqrt(scale * r);
+    g = sqrt(scale * g);
+    b = sqrt(scale * b);
+
+    out << static_cast<int>(255.999 * math::clamp<float>(r, 0.0, 0.999)) << ' '
+        << static_cast<int>(255.999 * math::clamp<float>(g, 0.0, 0.999)) << ' '
+        << static_cast<int>(255.999 * math::clamp<float>(b, 0.0, 0.999)) << '\n';
 }
 
 #endif //DEMO_RAY_TRACER_COLOR_H

@@ -10,14 +10,14 @@
 
 class Sphere : public Primitive {
 public:
-    Sphere(const Vec3 &center, float radius, Material *material)
+    Sphere(const Vec3 &center, float radius, shared_ptr<Material> material)
             : Primitive(material), m_center(center), m_radius(radius) {};
 
     virtual RayHitResult intersection(const Ray &r, float t0, float t1) override {
         RayHitResult res;
         res.primitive = this;
         float A = r.direction().dot(r.direction());
-        Vec3 sCenterToROrigin = r.origin().minus(m_center);
+        Vec3 sCenterToROrigin = r.origin() - m_center;
         float B = r.direction().dot(sCenterToROrigin);
         float C = sCenterToROrigin.dot(sCenterToROrigin) - m_radius * m_radius;
 
@@ -29,8 +29,10 @@ public:
             float t = (-B - p1) * p;
             if (t > t0 && t < t1) {
                 Vec3 hitPoint = r.evaluate(t);
-                Vec3 n = hitPoint.minus(m_center).scale(1/m_radius);
+                Vec3 n = (hitPoint - m_center) * 1/m_radius;
                 res.t = t;
+                res.point = hitPoint;
+                res.matPtr = m_mat;
                 res.setFaceNormal(r, n);
                 return res;
             }
@@ -39,11 +41,6 @@ public:
         res.t = std::numeric_limits<float>::max();
         res.isFrontFace = false;
         return res;
-    }
-
-private:
-    RayHitResult calculate(const Ray &r, float t) const {
-
     }
 
 private:

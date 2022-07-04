@@ -6,42 +6,46 @@
 #define DEMO_RAY_TRACER_MATERIAL_H
 
 #include <math.h>
-#include "../core/color.h"
-#include "../core/math.h"
+#include "../core/core.h"
+#include "ray.h"
 
 class Material {
 public:
-    virtual Color evaluate(const Vec3 &lightDir, const Vec3 &viewerDir, const Vec3 &normal) = 0;
+    virtual bool scatter(const Ray& inRay, const RayHitResult& rec, Color& attenuation, Ray& scattered) const = 0;
 };
 
-class BlinnPhongMaterial : public Material {
-
+class Lambertian : public Material {
 public:
-    BlinnPhongMaterial(
-            const Color &reflectance,
-            const Color & specular,
-            float phongExponent
-    ): m_reflectance(reflectance), m_specularCoefficient(specular), m_phongExponent(phongExponent) {};
+    Lambertian(const Color& albedo) : m_albedo(albedo) {}
 
-    Color evaluate(const Vec3 &lightDir, const Vec3 &viewerDir, const Vec3 &normal) override {
-        Color L = m_reflectance.scale(1 / M_PI);
-        Vec3 halfVector = lightDir.add(viewerDir).normalize();
-        return L.add(m_specularCoefficient.scale(std::max(0.0f, pow(normal.dot(halfVector), m_phongExponent))));
+    virtual bool scatter(const Ray &inRay, const RayHitResult &rec, Color &attenuation, Ray &scattered) const override {
+        Vec3 scatterDirection = rec.normal + Vec3::randomUnitVector();
+
+        if (scatterDirection.nearZero())
+            scatterDirection = rec.normal;
+
+        scattered = Ray(rec.point, scatterDirection);
+        attenuation = m_albedo;
+        return true;
     }
-
 
 private:
-    Color m_reflectance;
-    Color m_specularCoefficient;
-    float m_phongExponent;
+    Color m_albedo;
 };
 
-class NormalColorMaterial : public Material {
+class Metal : public Material {
 public:
-    NormalColorMaterial() {};
-    Color evaluate(const Vec3 &lightDir, const Vec3 &viewerDir, const Vec3 &normal) override {
-        return Color(normal.x() + 1, normal.y() + 1, normal.z() + 1).scale(0.5);
+    Metal(const Color& albedo) : m_albedo(albedo) {}
+
+    virtual bool scatter(const Ray &inRay, const RayHitResult &rec, Color &attenuation, Ray &scattered) const override {
+        Vec3 reflected = reflect(inRay.direction().normalize(), rec.normal);
+        scattered = Ray(rec.point, reflected);
+        attenuation = m_albedo;
+        return (scattered.direction().dot(rec.normal) > 0);
     }
+
+private:
+    Color m_albedo;
 };
 
 #endif //DEMO_RAY_TRACER_MATERIAL_H

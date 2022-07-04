@@ -11,30 +11,30 @@
 class Scene: public Primitive {
 public:
     Scene() : Primitive(nullptr) {};
-    void addPrimitive(Primitive *p) {
+
+    void addPrimitive(shared_ptr<Primitive> p) {
         m_ps.push_back(p);
     }
 
-    std::vector<Primitive *> primitives() {
+    std::vector<shared_ptr<Primitive>> primitives() {
         return m_ps;
     }
 
     virtual RayHitResult intersection(const Ray &r, float t0, float t1) override {
         RayHitResult res;
         res.primitive = this;
+        res.t = std::numeric_limits<float>::max();
         for (auto p : m_ps) {
             RayHitResult rHit = p->intersection(r, t0, t1);
             if (rHit.t < res.t) {
                 res = rHit;
-                return res;
             }
         }
-        res.t = std::numeric_limits<float>::max();
         return res;
     }
 
 private:
-    std::vector<Primitive *> m_ps = std::vector<Primitive *>();
+    std::vector<shared_ptr<Primitive>> m_ps = std::vector<shared_ptr<Primitive>>();
 };
 
 #endif //DEMO_RAY_TRACER_SCENE_H
