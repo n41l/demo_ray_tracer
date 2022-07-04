@@ -23,31 +23,16 @@ protected:
     Material *m_mat;
 };
 
-class RayHitResult {
+struct RayHitResult {
+    Primitive *primitive;
+    float t;
+    Vec3 normal;
+    bool isFrontFace;
 
-public:
-    RayHitResult(Primitive *p, float t, const Vec3 &n): m_p(p), m_t(t), m_n(n) {};
-    static RayHitResult NotHit(Primitive *p) {
-        return RayHitResult(p, std::numeric_limits<float>::max(), Vec3(0, 0, 0));
+    inline void setFaceNormal(const Ray& r, const Vec3 &n) {
+        isFrontFace = r.direction().dot(n) < 0;
+        normal = isFrontFace ? n : n.inverse();
     }
-
-    Primitive* primitive() const {
-        return m_p;
-    }
-
-
-    float t() const {
-        return m_t;
-    }
-
-    Vec3 normal() const {
-        return m_n;
-    }
-
-private:
-    Primitive *m_p;
-    float m_t;
-    Vec3 m_n;
 };
 
 #endif //DEMO_RAY_TRACER_PRIMITIVE_H

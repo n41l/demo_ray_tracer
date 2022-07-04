@@ -14,7 +14,7 @@ public:
     virtual Color evaluate(const Vec3 &lightDir, const Vec3 &viewerDir, const Vec3 &normal) = 0;
 };
 
-class BlinnPhongMaterial : public Material { ;
+class BlinnPhongMaterial : public Material {
 
 public:
     BlinnPhongMaterial(
@@ -34,6 +34,14 @@ private:
     Color m_reflectance;
     Color m_specularCoefficient;
     float m_phongExponent;
+};
+
+class NormalColorMaterial : public Material {
+public:
+    NormalColorMaterial() {};
+    Color evaluate(const Vec3 &lightDir, const Vec3 &viewerDir, const Vec3 &normal) override {
+        return Color(normal.x() + 1, normal.y() + 1, normal.z() + 1).scale(0.5);
+    }
 };
 
 #endif //DEMO_RAY_TRACER_MATERIAL_H

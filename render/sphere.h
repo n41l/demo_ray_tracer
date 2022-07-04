@@ -14,6 +14,8 @@ public:
             : Primitive(material), m_center(center), m_radius(radius) {};
 
     virtual RayHitResult intersection(const Ray &r, float t0, float t1) override {
+        RayHitResult res;
+        res.primitive = this;
         float A = r.direction().dot(r.direction());
         Vec3 sCenterToROrigin = r.origin().minus(m_center);
         float B = r.direction().dot(sCenterToROrigin);
@@ -21,37 +23,27 @@ public:
 
         float discriminant = B * B - A * C;
 
-        if (discriminant > 0) {
+        if (discriminant >= 0) {
             float p = 1 / A;
             float p1= sqrt(discriminant);
-            float t1 = (-B + p1) * p;
-            float t2 = (-B - p1) * p;
-
-            float minT = std::min(t1, t2);
-            float maxT = std::max(t1, t2);
-
-            if (minT > t0 && minT < t1) {
-                return calculate(r, minT);
-            } else {
-                if (maxT > t0 && maxT < t1) {
-                    return calculate(r, maxT);
-                }
-            }
-        } else if (discriminant == 0) {
-            float t = -B / A;
+            float t = (-B - p1) * p;
             if (t > t0 && t < t1) {
-                return calculate(r, t);
+                Vec3 hitPoint = r.evaluate(t);
+                Vec3 n = hitPoint.minus(m_center).scale(1/m_radius);
+                res.t = t;
+                res.setFaceNormal(r, n);
+                return res;
             }
         }
 
-        return RayHitResult::NotHit((Primitive *) this);
+        res.t = std::numeric_limits<float>::max();
+        res.isFrontFace = false;
+        return res;
     }
 
 private:
     RayHitResult calculate(const Ray &r, float t) const {
-        Vec3 p = r.evaluate(t);
-        Vec3 n = p.minus(m_center).scale(1/m_radius);
-        return RayHitResult((Primitive *) this, t, n);
+
     }
 
 private:

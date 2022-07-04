@@ -20,14 +20,16 @@ public:
     }
 
     virtual RayHitResult intersection(const Ray &r, float t0, float t1) override {
-        RayHitResult res = RayHitResult::NotHit((Primitive *)this);
+        RayHitResult res;
+        res.primitive = this;
         for (auto p : m_ps) {
             RayHitResult rHit = p->intersection(r, t0, t1);
-            if (rHit.t() < res.t()) {
+            if (rHit.t < res.t) {
                 res = rHit;
+                return res;
             }
         }
-
+        res.t = std::numeric_limits<float>::max();
         return res;
     }
 

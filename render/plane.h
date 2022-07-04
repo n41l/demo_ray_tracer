@@ -12,6 +12,8 @@ public:
     Plane(const Vec3 &center, const Vec3 &normal, Material *mat): Primitive(mat), m_center(center), m_normal(normal) {};
 
     RayHitResult intersection(const Ray &r, float t0, float t1) override {
+        RayHitResult res;
+        res.primitive = this;
         float denominator = m_normal.inverse().dot(r.direction());
 
         if (denominator > 1e-6) {
@@ -19,11 +21,15 @@ public:
             float t = p.dot(m_normal.inverse()) / denominator;
 
             if (t > t0 && t < t1) {
-                return RayHitResult(this, t, m_normal);
+                res.t = t;
+                res.setFaceNormal(r, m_normal);
+                return res;
             }
         }
 
-        return RayHitResult::NotHit(this);
+        res.t = std::numeric_limits<float>::max();
+        res.isFrontFace = false;
+        return res;
     }
 
 private:

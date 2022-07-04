@@ -42,7 +42,9 @@ int main() {
             1
     );
 
-    Sphere *s1 = new Sphere(Vec3(0.0f, 0.0f, -15.0f), 5, mat1);
+    NormalColorMaterial *mat4 = new NormalColorMaterial();
+
+    Sphere *s1 = new Sphere(Vec3(0.0f, 0.0f, -15.0f), 5, mat4);
     Sphere *s2 = new Sphere(Vec3(5.0f, 3.0f, -20.0f), 8, mat2);
     Plane * plane = new Plane(Vec3(0.0f,-5.0f, 0.0f), Vec3(0.0f, 1.0f, 0.0f), mat3);
 
@@ -66,7 +68,7 @@ int main() {
 
             RayHitResult rHit = scene.intersection(r, 0.0f, 1000.0f);
 
-            if (rHit.t() != std::numeric_limits<float>::max()) {
+            if (rHit.t < std::numeric_limits<float>::max()) {
                 pixelColor = Vec3(0.0f, 0.0f, 0.0f);
                 for(auto light : lights) {
                     pixelColor = pixelColor.add(light->illuminate(r, rHit, scene));
