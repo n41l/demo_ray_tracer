@@ -16,21 +16,34 @@ public:
         m_ps.push_back(p);
     }
 
-    std::vector<shared_ptr<Primitive>> primitives() {
+    std::vector<shared_ptr<Primitive>> primitives() const {
         return m_ps;
     }
 
-    virtual RayHitResult intersection(const Ray &r, float t0, float t1) override {
-        RayHitResult res;
-        res.primitive = this;
-        res.t = std::numeric_limits<float>::max();
+    virtual bool boundingBox(Aabb &outputBox) const override {
+        if (m_ps.empty()) return false;
+        Aabb tempBox;
+        bool isFirstBox = true;
+
+        for (const auto& primitive: m_ps) {
+            if (!primitive->boundingBox(tempBox)) return false;
+            outputBox = isFirstBox ? tempBox : surroundingBox(outputBox, tempBox);
+            isFirstBox = false;
+        }
+
+        return true;
+    }
+
+    virtual bool hit(const Ray &r, float t0, float t1, RayHitResult& res) override {
+        bool hit = false;
         for (auto p : m_ps) {
-            RayHitResult rHit = p->intersection(r, t0, t1);
-            if (rHit.t < res.t) {
-                res = rHit;
+            RayHitResult rHit;
+            if (p->hit(r, t0, t1, rHit)) {
+                res = rHit.t < res.t ? rHit : res;
+                hit = true;
             }
         }
-        return res;
+        return hit;
     }
 
 private:

@@ -5,7 +5,6 @@
 #ifndef DEMO_RAY_TRACER_LIGHT_H
 #define DEMO_RAY_TRACER_LIGHT_H
 
-#include <math.h>
 #include "../core/color.h"
 #include "ray.h"
 #include "primitive.h"

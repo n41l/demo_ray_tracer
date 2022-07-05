@@ -1,18 +1,28 @@
 //
 // Created by Kun Huang on 2022/6/24.
 //
-#ifndef DEMO_RAY_TRACER_MATH_H
-#define DEMO_RAY_TRACER_MATH_H
+#ifndef DEMO_RAY_TRACER_MATH_LIB_H
+#define DEMO_RAY_TRACER_MATH_LIB_H
 
-#include <math.h>
+#include <cmath>
+#include <limits>
 #include "random.h"
-#include "utilities.h"
 
-namespace math {
-    template <typename T>
-    T clamp(const T& n, const T& lower, const T& upper) {
-        return std::max(lower, std::min(n, upper));
-    }
+using std::sqrt;
+
+// Constants
+
+const float infinity = std::numeric_limits<float>::infinity();
+const float pi = 3.1415926535897932385;
+
+// Utility Functions
+
+inline float degreesToRadians(float degrees) {
+    return degrees * pi / 180.0;
+}
+
+float fclamp(float n, float lower, float upper) {
+    return fmax(lower, fmin(n, upper));
 }
 
 
@@ -67,7 +77,7 @@ public:
     }
 
     inline Vec3 clamp(float lower, float upper) const {
-        return Vec3(math::clamp(m_ps[0], lower, upper), math::clamp(m_ps[1], lower, upper), math::clamp(m_ps[2], lower, upper));
+        return Vec3(fclamp(m_ps[0], lower, upper), fclamp(m_ps[1], lower, upper), fclamp(m_ps[2], lower, upper));
     }
 
     bool nearZero() const {
@@ -144,4 +154,4 @@ inline Vec3 refract(const Vec3& inDir, const Vec3& normal, float etaiOverEtat) {
 using Color = Vec3;
 using Point3 = Vec3;
 
-#endif //DEMO_RAY_TRACER_MATH_H
+#endif //DEMO_RAY_TRACER_MATH_LIB_H

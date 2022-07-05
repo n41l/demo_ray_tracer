@@ -5,7 +5,6 @@
 #ifndef DEMO_RAY_TRACER_MATERIAL_H
 #define DEMO_RAY_TRACER_MATERIAL_H
 
-#include <math.h>
 #include "../core/core.h"
 #include "ray.h"
 

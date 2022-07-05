@@ -13,8 +13,14 @@ public:
     Sphere(const Vec3 &center, float radius, shared_ptr<Material> material)
             : Primitive(material), m_center(center), m_radius(radius) {};
 
-    virtual RayHitResult intersection(const Ray &r, float t0, float t1) override {
-        RayHitResult res;
+    bool boundingBox(Aabb &outputBox) const override {
+        outputBox = Aabb(
+                m_center - Vec3(m_radius, m_radius, m_radius),
+                m_center + Vec3(m_radius, m_radius, m_radius)
+        );
+        return true;
+    }
+    bool hit(const Ray &r, float t0, float t1, RayHitResult& res) override {
         res.primitive = this;
         float A = r.direction().dot(r.direction());
         Vec3 sCenterToROrigin = r.origin() - m_center;
@@ -34,13 +40,10 @@ public:
                 res.point = hitPoint;
                 res.matPtr = m_mat;
                 res.setFaceNormal(r, n);
-                return res;
+                return true;
             }
         }
-
-        res.t = std::numeric_limits<float>::max();
-        res.isFrontFace = false;
-        return res;
+        return false;
     }
 
 private:

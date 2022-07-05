@@ -6,7 +6,7 @@
 #define DEMO_RAY_TRACER_CORE_H
 
 #include "color.h"
-#include "math.h"
+#include "math_lib.h"
 #include "random.h"
 #include "utilities.h"
 
