@@ -9,20 +9,24 @@
 
 class Camera {
 public:
-    Camera() {
-        float aspectRatio = 16.0 / 9.0;
-        float viewportHeight  = 2.0;
+    Camera(Point3 lookFrom, Point3 lookAt, Vec3 upDir, float fov, float aspectRatio): m_lookFrom(lookFrom), m_lookAt(lookAt), m_upDir(upDir), m_fov(fov) {
+        float theta = degreesToRadians(fov);
+        float h = tan(theta / 2);
+        float viewportHeight  = 2.0f * h;
         float viewPortWidth = aspectRatio * viewportHeight;
-        float focalLength = 1.0;
 
-        origin = Point3(0, 0, 0);
-        horizontal = Vec3(viewPortWidth, 0.0, 0.0);
-        vertical = Vec3(0.0, viewportHeight, 0.0);
-        lowerLeftCorner = origin - horizontal  / 2 - vertical / 2 - Vec3(0, 0, focalLength);
+        Vec3 w = (lookFrom - lookAt).normalize();
+        Vec3 u = upDir.cross(w).normalize();
+        Vec3 v = w.cross(u);
+
+        origin = lookFrom;
+        horizontal = viewPortWidth * u;
+        vertical = viewportHeight * v;
+        lowerLeftCorner = origin - horizontal  / 2 - vertical / 2 - w;
     }
 
     Ray getRay(float u, float v) {
-        return Ray(origin, lowerLeftCorner + u * horizontal + v * vertical);
+        return Ray(origin, lowerLeftCorner + u * horizontal + v * vertical - origin);
     }
 
 private:
@@ -30,6 +34,10 @@ private:
     Point3 lowerLeftCorner;
     Vec3 horizontal;
     Vec3 vertical;
+    float m_fov;
+    Point3 m_lookFrom;
+    Point3 m_lookAt;
+    Vec3 m_upDir;
 };
 
 

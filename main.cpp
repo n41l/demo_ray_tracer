@@ -29,18 +29,19 @@ int main() {
     const int samplesPerPixel = 10;
     const int maxDepth = 50;
 
-    Camera camera;
+    Camera camera(Point3(-2,2,1), Point3(0,0,-1), Vec3(0,1,0), 20, 16.0 / 9.0);
 
     auto material_ground = make_shared<Lambertian>(Color(0.8, 0.8, 0.0));
-    auto material_center = make_shared<Lambertian>(Color(0.7, 0.3, 0.3));
-    auto material_left   = make_shared<Metal>(Color(0.8, 0.8, 0.8));
-    auto material_right  = make_shared<Metal>(Color(0.8, 0.6, 0.2));
+    auto material_center = make_shared<Lambertian>(Color(0.1, 0.2, 0.5));
+    auto material_left   = make_shared<Dielectric>(1.5);
+    auto material_right  = make_shared<Metal>(Color(0.8, 0.6, 0.2), 1);
 
     Scene scene = Scene();
     scene.addPrimitive(make_shared<Plane>(Vec3(0.0f,-5.0f, 0.0f), Vec3(0.0f, 1.0f, 0.0f), material_ground));
-    scene.addPrimitive(make_shared<Sphere>(Vec3(0.0f, 0.0f, -15.0f), 5, material_center));
-    scene.addPrimitive(make_shared<Sphere>(Vec3(-10.0f, 0.0f, -15.0f), 5, material_left));
-    scene.addPrimitive(make_shared<Sphere>(Vec3(10.0f, 0.0f, -15.0f), 5, material_right));
+    scene.addPrimitive(make_shared<Sphere>(Point3( 0.0,    0.0, -1.0),   0.5, material_center));
+    scene.addPrimitive(make_shared<Sphere>(Point3(-1.0,    0.0, -1.0),   0.5, material_left));
+    scene.addPrimitive(make_shared<Sphere>(Point3(-1.0,    0.0, -1.0),  -0.4, material_left));
+    scene.addPrimitive(make_shared<Sphere>(Point3( 1.0,    0.0, -1.0),   0.5, material_right));
 
     std::cout << "P3\n" << imageWidth << ' ' << imageHeight << "\n255\n";
 

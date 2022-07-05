@@ -131,6 +131,16 @@ inline Vec3 reflect(const Vec3& in, const Vec3& normal) {
     return in - 2 * in.dot(normal) * normal;
 }
 
+/*
+ * Assuming that the inDir and normal are unit vectors;
+ * */
+inline Vec3 refract(const Vec3& inDir, const Vec3& normal, float etaiOverEtat) {
+    float cosTheta = fmin(-inDir.inverse().dot(normal), 1.0);
+    Vec3 outPerp = etaiOverEtat * (inDir + cosTheta * normal);
+    Vec3 outPara = -sqrt(fabs(1.0 - outPerp.magnitudeSquare())) * normal;
+    return outPerp + outPara;
+}
+
 using Color = Vec3;
 using Point3 = Vec3;
 
