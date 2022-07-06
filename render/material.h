@@ -7,15 +7,20 @@
 
 #include "../core/core.h"
 #include "ray.h"
+#include "texture.h"
 
 class Material {
 public:
     virtual bool scatter(const Ray& inRay, const RayHitResult& rec, Color& attenuation, Ray& scattered) const = 0;
+    virtual Color emitted(float u, float v, const Point3& point) const {
+        return Color(0, 0, 0);
+    }
 };
 
 class Lambertian : public Material {
 public:
-    Lambertian(const Color& albedo) : m_albedo(albedo) {}
+    Lambertian(const Color& albedo) : m_albedo(make_shared<SolidColor>(albedo)) {}
+    Lambertian(shared_ptr<Texture> tex) : m_albedo(tex) {}
 
     virtual bool scatter(const Ray &inRay, const RayHitResult &rec, Color &attenuation, Ray &scattered) const override {
         Vec3 scatterDirection = rec.normal + Vec3::randomUnitVector();
@@ -24,12 +29,12 @@ public:
             scatterDirection = rec.normal;
 
         scattered = Ray(rec.point, scatterDirection);
-        attenuation = m_albedo;
+        attenuation = m_albedo->value(rec.u, rec.v, rec.point);
         return true;
     }
 
 private:
-    Color m_albedo;
+    shared_ptr<Texture> m_albedo;
 };
 
 class Metal : public Material {
@@ -82,5 +87,23 @@ private:
 private:
     float m_ir;
 };
+
+class diffuse_light : public Material {
+public:
+    diffuse_light(shared_ptr<Texture> tex) : m_emit(tex) {}
+    diffuse_light(Color c) : m_emit(make_shared<SolidColor>(c)) {}
+
+    bool scatter(const Ray &inRay, const RayHitResult &rec, Color &attenuation, Ray &scattered) const override {
+        return false;
+    }
+
+    Color emitted(float u, float v, const Point3 &point) const override {
+        return m_emit->value(u, v, point);
+    }
+
+private:
+    shared_ptr<Texture> m_emit;
+};
+
 
 #endif //DEMO_RAY_TRACER_MATERIAL_H

@@ -40,10 +40,19 @@ public:
                 res.point = hitPoint;
                 res.matPtr = m_mat;
                 res.setFaceNormal(r, n);
+                getSphereUV(n, res.u, res.v);
                 return true;
             }
         }
         return false;
+    }
+
+private:
+    static void getSphereUV(const Point3& point, float& u, float& v) {
+        float theta = acos(-point.y());
+        float phi = atan2(-point.z(), point.x()) + pi;
+        u = phi / (2 * pi);
+        v = theta / pi;
     }
 
 private:

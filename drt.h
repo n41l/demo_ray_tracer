@@ -16,5 +16,7 @@
 #include "render/camera.h"
 #include "render/bvh/aabb.h"
 #include "render/bvh/bvh_node.h"
+#include "render/aarect.h"
+#include "render/box.h"
 
 #endif //DEMO_RAY_TRACER_DRT_H

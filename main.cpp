@@ -1,47 +1,69 @@
 #include <iostream>
 #include "drt.h"
 
-Color ray_color(const Ray& r, BVHNode node, int depth) {
+Color ray_color(const Ray& r, const Color& background, BVHNode node, int depth) {
     RayHitResult res;
     res.t = std::numeric_limits<float>::max();
     if (depth <= 0)
         return Color(0, 0, 0);
 
-    if (node.hit(r, 0.001, std::numeric_limits<float>::max(), res)) {
-        Ray scattered;
-        Color attenuation;
-        if (res.matPtr->scatter(r, res, attenuation, scattered)) {
-            return attenuation * ray_color(scattered, node, depth - 1);
-        }
-        return Color(0, 0, 0);
+    if (!node.hit(r, 0.001, std::numeric_limits<float>::max(), res))
+        return background;
+
+    Ray scattered;
+    Color attenuation;
+    Color emitted = res.matPtr->emitted(res.u, res.v, res.point);
+
+
+    if (!res.matPtr->scatter(r, res, attenuation, scattered)) {
+        return emitted;
     }
 
-    Vec3 unit_direction = r.direction().normalize();
-    auto t = 0.5*(unit_direction.y() + 1.0);
-    return Color(1.0, 1.0, 1.0) * (1.0f - t) + Color(0.5, 0.7, 1.0) * t;
+    return emitted + attenuation * ray_color(scattered, background, node, depth - 1);
+}
+
+Scene cornellBox() {
+    Scene box;
+    auto red = make_shared<Lambertian>(Color(.65, .05, .05));
+    auto white = make_shared<Lambertian>(Color(.73, .73, .73));
+    auto green = make_shared<Lambertian>(Color(.12, .45, .15));
+    auto light = make_shared<diffuse_light>(Color(15, 15, 15));
+
+    box.addPrimitive(make_shared<yz_rect>(0, 555, 0, 555, 555, green));
+    box.addPrimitive(make_shared<yz_rect>(0, 555, 0, 555, 0, red));
+    box.addPrimitive(make_shared<xz_rect>(213, 343, 227, 332, 554, light));
+    box.addPrimitive(make_shared<xz_rect>(0, 555, 0, 555, 0, white));
+    box.addPrimitive(make_shared<xz_rect>(0, 555, 0, 555, 555, white));
+    box.addPrimitive(make_shared<xy_rect>(0, 555, 0, 555, 555, white));
+
+    shared_ptr<Primitive> box1 = make_shared<Box>(Point3(0, 0, 0), Point3(165, 330, 165), white);
+    box1 = make_shared<RotateY>(box1, 15);
+    box1 = make_shared<Translate>(box1, Vec3(265,0,295));
+    box.addPrimitive(box1);
+
+    shared_ptr<Primitive> box2 = make_shared<Box>(Point3(0,0,0), Point3(165,165,165), white);
+    box2 = make_shared<RotateY>(box2, -18);
+    box2 = make_shared<Translate>(box2, Vec3(130,0,65));
+    box.addPrimitive(box2);
+
+    return box;
 }
 
 int main() {
 
-    const float aspectRatio = 16.0 / 9.0;
-    const int imageWidth = 512;
+    const float aspectRatio = 1.0;
+    const int imageWidth = 600;
     const int imageHeight = static_cast<int>(imageWidth / aspectRatio);
     const int samplesPerPixel = 100;
     const int maxDepth = 50;
+    const Color background(0, 0, 0);
+    Point3 lookFrom = Point3(278, 278, -800);
+    Point3 lookAt = Point3(278, 278, 0);
+    float vFov = 40.0;
 
-    Camera camera(Point3(-2,2,1), Point3(0,0,-1), Vec3(0,1,0), 20, 16.0 / 9.0);
+    Camera camera(lookFrom, lookAt, Vec3(0,1,0),  vFov, aspectRatio);
 
-    auto material_ground = make_shared<Lambertian>(Color(0.8, 0.8, 0.0));
-    auto material_center = make_shared<Lambertian>(Color(0.1, 0.2, 0.5));
-    auto material_left   = make_shared<Dielectric>(1.5);
-    auto material_right  = make_shared<Metal>(Color(0.8, 0.6, 0.2), 1);
-
-    Scene scene = Scene();
-    scene.addPrimitive(make_shared<Plane>(Vec3(0.0f,-5.0f, 0.0f), Vec3(0.0f, 1.0f, 0.0f), 1000, 1000, material_ground));
-    scene.addPrimitive(make_shared<Sphere>(Point3( 0.0,    0.0, -1.0),   0.5, material_center));
-    scene.addPrimitive(make_shared<Sphere>(Point3(-1.0,    0.0, -1.0),   0.5, material_left));
-    scene.addPrimitive(make_shared<Sphere>(Point3(-1.0,    0.0, -1.0),  -0.4, material_left));
-    scene.addPrimitive(make_shared<Sphere>(Point3( 1.0,    0.0, -1.0),   0.5, material_right));
+    Scene scene = cornellBox();
 
     BVHNode root = BVHNode(scene);
 
@@ -55,7 +77,7 @@ int main() {
                 float u = (i + Random::Float()) / float(imageWidth - 1);
                 float v = (j + Random::Float()) / float(imageHeight - 1);
                 Ray r = camera.getRay(u, v);
-                pixelColor += ray_color(r, root, maxDepth);
+                pixelColor += ray_color(r, background, root, maxDepth);
             }
             write_color(std::cout, pixelColor, samplesPerPixel);
         }

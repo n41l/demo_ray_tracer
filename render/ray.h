@@ -30,6 +30,8 @@ public:
     Primitive *primitive;
     shared_ptr<Material> matPtr;
     float t;
+    float u;
+    float v;
     Point3 point;
     Vec3 normal;
     bool isFrontFace;
